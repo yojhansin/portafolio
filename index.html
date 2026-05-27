@@ -1,497 +1,1363 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portafolio de Yojhan</title>
-
-  <!-- Bootstrap CSS + Icons + Google Fonts -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-
-  <!-- AOS CSS -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sistema de Comandas · Yojhan Furuya</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
 
   <style>
-    
+    /* ═══════════════════════════════════════════
+       VARIABLES & RESET
+    ═══════════════════════════════════════════ */
+    :root {
+      --bg:        #07080c;
+      --bg-2:      #0d1018;
+      --card:      #11141d;
+      --card-2:    #171b28;
+      --text:      #f5f7fb;
+      --muted:     #a8b1c3;
+      --muted-2:   #737f94;
+      --line:      rgba(255,255,255,0.10);
+      --line-soft: rgba(255,255,255,0.065);
+      --accent:    #8b5cf6;
+      --accent-2:  #22d3ee;
+      --accent-3:  #d6ff4f;
+      --r-xl: 34px; --r-lg: 26px; --r-md: 18px;
+      --shadow: 0 26px 80px rgba(0,0,0,0.48);
+      --container: 1240px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
-      background-color: #f8f9fa;
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%,  rgba(139,92,246,0.24), transparent 31%),
+        radial-gradient(circle at 92% 12%, rgba(34,211,238,0.16),  transparent 28%),
+        radial-gradient(circle at 58% 80%, rgba(214,255,79,0.09),  transparent 28%),
+        linear-gradient(180deg, #07080c 0%, #0c0f17 50%, #07080c 100%);
+      overflow-x: hidden;
+      cursor: none;
+    }
+    /* grid texture */
+    body::before {
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+    }
+    a { text-decoration: none; color: inherit; }
+    img, video { display: block; max-width: 100%; }
+
+    /* ═══════════════════════════════════════════
+       CUSTOM CURSOR
+    ═══════════════════════════════════════════ */
+    #cursor-dot, #cursor-ring {
+      position: fixed; top:0; left:0;
+      border-radius: 50%; pointer-events: none;
+      transform: translate(-50%,-50%);
+      z-index: 9999;
+      transition: opacity .3s ease;
+    }
+    #cursor-dot {
+      width: 8px; height: 8px;
+      background: var(--accent-3);
+      box-shadow: 0 0 12px rgba(214,255,79,.8);
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(214,255,79,.55);
+      transition: transform .12s ease, width .25s ease, height .25s ease, border-color .25s ease;
+    }
+    body.cursor-hover #cursor-ring {
+      width: 56px; height: 56px;
+      border-color: var(--accent-3);
     }
 
-    header {
-      position: relative;
-      height: 100vh;
-      background-color: #1e1e1e;
-      color: white;
+    /* ═══════════════════════════════════════════
+       PROGRESS BAR
+    ═══════════════════════════════════════════ */
+    #progress-bar {
+      position: fixed; top:0; left:0; height:3px; z-index:2000;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+      width: 0%; transition: width .1s linear;
+      box-shadow: 0 0 12px rgba(214,255,79,.5);
     }
 
-    .header-nombre {
-      position: absolute;
-      top: 20px;
-      left: 50%;
+    /* ═══════════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════════ */
+    .site-nav {
+      position: fixed; top:22px; left:50%;
       transform: translateX(-50%);
-      font-size: 40px;
-      font-weight: 700;
-      color: white;
+      width: min(980px, calc(100% - 2rem));
+      min-height: 66px; z-index: 1050;
+      display: flex; align-items: center;
+      justify-content: space-between; gap:16px;
+      padding: 10px 12px 10px 20px;
+      border-radius: 999px;
+      background: rgba(7,8,12,.76);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.34);
+      transition: background .3s ease, box-shadow .3s ease;
+    }
+    .site-nav.scrolled {
+      background: rgba(7,8,12,.92);
+      box-shadow: 0 24px 70px rgba(0,0,0,.5);
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap:10px;
+      color: white; font-family:"Space Grotesk",sans-serif;
+      font-weight:700; letter-spacing:-.03em; white-space:nowrap;
+    }
+    .brand:hover { color:white; }
+    .brand-mark {
+      width:34px; height:34px; display:grid; place-items:center;
+      border-radius:50%; color:#07080c;
+      background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
+      font-weight:900;
+    }
+    .nav-links {
+      display:flex; align-items:center; gap:4px;
+      list-style:none;
+    }
+    .nav-links a {
+      display:inline-flex; align-items:center;
+      padding:11px 13px; border-radius:999px;
+      color:var(--muted); font-size:.86rem; font-weight:800;
+      transition: background .28s ease, color .28s ease;
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color:white; background: rgba(255,255,255,.085);
+    }
+    .nav-cta {
+      padding:11px 15px; border-radius:999px;
+      background:white; color:#07080c;
+      font-size:.86rem; font-weight:900; white-space:nowrap;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .nav-cta:hover { color:#07080c; transform:translateY(-3px); box-shadow:0 8px 22px rgba(255,255,255,.18); }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT HELPERS
+    ═══════════════════════════════════════════ */
+    .container-custom {
+      width: min(100% - 2rem, var(--container));
+      margin-inline: auto;
+      position: relative; z-index:1;
+    }
+    .section { padding: 100px 0; }
+    .eyebrow {
+      display:inline-flex; align-items:center; gap:10px;
+      color:var(--accent-3); font-size:.8rem; font-weight:900;
+      letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px;
+    }
+    .eyebrow::before {
+      content:""; width:9px; height:9px; border-radius:50%;
+      background:var(--accent-3);
+      box-shadow: 0 0 22px rgba(214,255,79,.7);
+    }
+    .section-title {
+      font-family:"Space Grotesk",sans-serif;
+      font-weight:700; letter-spacing:-.07em; line-height:.9; margin:0;
+      font-size: clamp(2.4rem,5vw,5rem);
     }
 
-    .header-correo {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      font-size: 18px;
-      color: white;
+    /* ═══════════════════════════════════════════
+       BREADCRUMB
+    ═══════════════════════════════════════════ */
+    .breadcrumb-row {
+      display:flex; align-items:center; gap:10px;
+      margin-bottom:36px; color:var(--muted-2);
+      font-size:.86rem; font-weight:700;
+    }
+    .breadcrumb-row a {
+      color:var(--muted); display:inline-flex; align-items:center; gap:6px;
+      padding:8px 14px; border-radius:999px;
+      border:1px solid var(--line-soft);
+      background:rgba(255,255,255,.04);
+      transition: color .22s, background .22s, transform .22s;
+    }
+    .breadcrumb-row a:hover { color:white; background:rgba(255,255,255,.09); transform:translateX(-3px); }
+
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    .project-hero { padding: 128px 0 80px; }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px; align-items: start;
     }
 
-    .intro-card {
-      border-radius: 24px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-      background-color: #fff;
-      transition: box-shadow 0.3s ease;
-      display: flex;
-      align-items: center;
-      padding: 2rem 2.5rem;
-      max-width: 850px;
-      margin: auto;
-      gap: 2rem;
+    /* ── GALERÍA ── */
+    .gallery-wrap {
+      display:flex; flex-direction:column; gap:0;
+      border-radius: var(--r-xl);
+      border:1px solid var(--line);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      background: var(--card);
     }
 
-    .intro-card:hover {
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    .gallery-main {
+      position:relative; overflow:hidden;
+      background: var(--bg-2);
+      height: 480px;
     }
 
-    .intro-card img {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #0d6efd;
-      flex-shrink: 0;
+    .gallery-main img {
+      width:100%; height:100%; object-fit:cover;
+      transition: opacity .4s ease, transform .6s ease;
+    }
+    .gallery-main img.fade-in { animation: imgFade .4s ease forwards; }
+    @keyframes imgFade {
+      from { opacity:0; transform:scale(1.04); }
+      to   { opacity:1; transform:scale(1); }
     }
 
-    .intro-texto h3 {
-      font-weight: 700;
-      font-size: 2rem;
-      color: #0d6efd;
+    .gallery-badge {
+      position:absolute; left:20px; top:20px;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:999px; color:white;
+      background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(14px); font-size:.8rem; font-weight:900;
     }
 
-    .intro-texto p {
-      font-size: 1.25rem;
-      color: #495057;
-      line-height: 1.6;
-      margin: 0;
+    /* lightbox trigger */
+    .gallery-expand {
+      position:absolute; right:20px; top:20px;
+      width:40px; height:40px; display:grid; place-items:center;
+      border-radius:50%; color:white;
+      background:rgba(0,0,0,.44); border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(12px); cursor:pointer;
+      transition: background .25s, transform .25s;
+    }
+    .gallery-expand:hover { background:rgba(255,255,255,.12); transform:scale(1.1); }
+
+    .gallery-counter {
+      position:absolute; right:20px; bottom:20px;
+      padding:7px 12px; border-radius:999px; color:white;
+      background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(12px); font-size:.78rem; font-weight:900;
     }
 
-    section {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      padding: 80px 0;
+    /* nav arrows */
+    .gallery-arrow {
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:44px; height:44px; display:grid; place-items:center;
+      border-radius:50%; color:white;
+      background:rgba(0,0,0,.44); border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(12px); cursor:pointer;
+      transition: background .25s, transform .25s, opacity .25s;
+      opacity:0;
+    }
+    .gallery-wrap:hover .gallery-arrow { opacity:1; }
+    .gallery-arrow:hover { background:rgba(255,255,255,.14); }
+    .gallery-arrow.prev { left:16px; }
+    .gallery-arrow.next { right:16px; }
+    .gallery-arrow:active { transform:translateY(-50%) scale(.92); }
+
+    /* thumbnails */
+    .gallery-thumbs {
+      display:flex; gap:10px; padding:14px 16px;
+      border-top:1px solid var(--line-soft);
+      background:rgba(255,255,255,.025);
+      overflow-x:auto; scrollbar-width:none;
+    }
+    .gallery-thumbs::-webkit-scrollbar { display:none; }
+    .gallery-thumbs button {
+      flex:0 0 80px; height:58px;
+      border-radius:14px; overflow:hidden;
+      border:2px solid transparent; padding:0;
+      background:var(--bg-2); cursor:pointer;
+      opacity:.5; transition: border-color .22s, opacity .22s, transform .22s;
+    }
+    .gallery-thumbs button:hover { opacity:.8; transform:translateY(-2px); }
+    .gallery-thumbs button.active { border-color:var(--accent-3); opacity:1; }
+    .gallery-thumbs button img { width:100%; height:100%; object-fit:cover; }
+    .gallery-thumbs .thumb-video {
+      display:grid; place-items:center; background:rgba(139,92,246,.15);
+    }
+    .gallery-thumbs .thumb-video i { color:var(--accent-3); font-size:1.3rem; }
+
+    /* ── INFO PANEL ── */
+    .info-panel {
+      position:sticky; top:106px;
+      display:flex; flex-direction:column; gap:16px;
     }
 
-    section h2 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 20px;
+    .info-card {
+      padding:28px; border-radius:var(--r-lg);
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
     }
 
-    section p, section li {
-      font-size: 1.25rem;
-      color: #333;
+    .project-kicker {
+      color:var(--accent-2); font-size:.78rem; font-weight:900;
+      letter-spacing:.12em; text-transform:uppercase; margin-bottom:12px;
     }
 
-    #sobre-mi { background-color: #ffffff; }
-    #habilidades { background-color: #e9f5ff; }
-    #herramientas { background-color: #fff4e6; }
-    #proyectos { background-color: #eafbea; }
-    #conclusion { background-color: #fef9f5; }
-
-    .seccion-icono {
-      font-size: 40px;
-      color: #0d6efd;
-      margin-bottom: 15px;
+    .project-title {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:clamp(1.9rem,3.5vw,3rem);
+      line-height:.95; letter-spacing:-.06em; font-weight:700;
+      margin:0 0 16px;
     }
 
-    /* Hamburguesa y menú lateral */
-    #menu-toggle { display: none; }
-
-    .toggle-hamburguesa {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      z-index: 1500;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+    .project-desc {
+      color:var(--muted); line-height:1.86; font-size:.98rem; margin:0;
     }
 
-    .toggle-hamburguesa span {
-      display: block;
-      height: 2px;
-      background-color: #4d79d1;
-      border-radius: 1px;
-      transition: all 0.3s ease;
+    .tags { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
+    .tags span {
+      padding:8px 11px; border-radius:999px;
+      color:var(--muted); font-size:.78rem; font-weight:800;
+      background:rgba(255,255,255,.045); border:1px solid var(--line-soft);
+      transition: color .22s, border-color .22s, background .22s;
+    }
+    .tags span:hover {
+      color:var(--text); border-color:rgba(214,255,79,.28);
+      background:rgba(214,255,79,.07);
     }
 
-    #menu-toggle:checked + .toggle-hamburguesa span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
+    .meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .meta-item {
+      padding:14px 16px; border-radius:16px;
+      background:rgba(255,255,255,.04); border:1px solid var(--line-soft);
+    }
+    .meta-item small {
+      display:block; color:var(--muted-2); font-size:.72rem;
+      font-weight:900; text-transform:uppercase; letter-spacing:.1em; margin-bottom:5px;
+    }
+    .meta-item span { color:var(--text); font-weight:700; font-size:.9rem; }
+
+    /* status dot */
+    .status-dot {
+      display:inline-flex; align-items:center; gap:7px;
+    }
+    .status-dot::before {
+      content:""; width:8px; height:8px; border-radius:50%;
+      background:#22c55e;
+      box-shadow:0 0 10px rgba(34,197,94,.8);
+      animation: pulse-dot 2s ease infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { box-shadow:0 0 10px rgba(34,197,94,.8); }
+      50%      { box-shadow:0 0 18px rgba(34,197,94,1); }
     }
 
-    #menu-toggle:checked + .toggle-hamburguesa span:nth-child(2) {
-      opacity: 0;
+    .btn-row { display:flex; flex-direction:column; gap:10px; }
+    .btn-main, .btn-ghost {
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px; border-radius:999px; padding:13px 18px;
+      font-weight:900; font-size:.92rem;
+      transition: transform .28s ease, box-shadow .28s ease, background .28s ease, color .28s ease;
+      width:100%;
+    }
+    .btn-main {
+      color:#07080c; background:var(--accent-3);
+      border:1px solid rgba(214,255,79,.5);
+      box-shadow:0 16px 46px rgba(214,255,79,.14);
+    }
+    .btn-main:hover { color:#07080c; transform:translateY(-4px); box-shadow:0 22px 54px rgba(214,255,79,.22); }
+    .btn-ghost {
+      color:var(--text); background:rgba(255,255,255,.055);
+      border:1px solid var(--line);
+    }
+    .btn-ghost:hover { color:white; background:rgba(255,255,255,.09); transform:translateY(-4px); }
+
+    /* ═══════════════════════════════════════════
+       STATS STRIP
+    ═══════════════════════════════════════════ */
+    .stats-strip {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+      margin-top:32px;
+    }
+    .stat-card {
+      padding:22px; border-radius:var(--r-md);
+      border:1px solid var(--line-soft);
+      background:rgba(255,255,255,.035);
+      text-align:center;
+      transition: border-color .3s, transform .3s, background .3s;
+    }
+    .stat-card:hover {
+      border-color:rgba(214,255,79,.24); transform:translateY(-6px);
+      background:rgba(214,255,79,.04);
+    }
+    .stat-card strong {
+      display:block; font-family:"Space Grotesk",sans-serif;
+      font-size:2rem; letter-spacing:-.06em; margin-bottom:6px;
+      background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .stat-card span { color:var(--muted); font-size:.82rem; line-height:1.5; }
+
+    /* ═══════════════════════════════════════════
+       DETAIL BLOCKS
+    ═══════════════════════════════════════════ */
+    .detail-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    }
+    .detail-block {
+      padding:30px; border-radius:var(--r-lg);
+      border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+      transition: border-color .3s, transform .35s;
+    }
+    .detail-block:hover { transform:translateY(-6px); }
+
+    .detail-block.purple {
+      background:linear-gradient(135deg,rgba(139,92,246,.14),transparent 45%),
+                 linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.025));
+      border-color:rgba(139,92,246,.22);
+    }
+    .detail-block.lime {
+      background:linear-gradient(135deg,rgba(214,255,79,.1),transparent 45%),
+                 linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+      border-color:rgba(214,255,79,.18);
+    }
+    .detail-block.teal {
+      background:linear-gradient(135deg,rgba(34,211,238,.1),transparent 45%),
+                 linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+      border-color:rgba(34,211,238,.18);
+    }
+    .block-icon {
+      width:48px; height:48px; display:grid; place-items:center;
+      border-radius:16px; color:#07080c;
+      background:linear-gradient(135deg,var(--accent-3),var(--accent-2));
+      font-size:1.2rem; margin-bottom:18px;
+    }
+    .detail-block h3 {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:1.45rem; letter-spacing:-.05em; margin:0 0 12px;
+    }
+    .detail-block p { color:var(--muted); line-height:1.86; margin:0; }
+    .detail-block ul { margin:12px 0 0; padding-left:1.1rem; }
+    .detail-block ul li { color:var(--muted); line-height:1.86; margin-bottom:5px; }
+    .detail-block ul li strong { color:var(--text); }
+
+    /* ═══════════════════════════════════════════
+       FEATURE LIST (módulos)
+    ═══════════════════════════════════════════ */
+    .feature-list { display:flex; flex-direction:column; gap:0; }
+    .feature-item {
+      display:grid; grid-template-columns:56px 1fr auto;
+      align-items:center; gap:20px;
+      padding:24px 0; border-bottom:1px solid var(--line-soft);
+      transition: padding-left .28s ease;
+      cursor:default;
+    }
+    .feature-item:last-child { border-bottom:none; }
+    .feature-item:hover { padding-left:8px; }
+
+    .feature-num {
+      width:48px; height:48px; display:grid; place-items:center;
+      border-radius:16px; border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      font-family:"Space Grotesk",sans-serif; font-weight:700;
+      color:var(--accent-3); font-size:.9rem;
+      transition: background .28s, border-color .28s;
+    }
+    .feature-item:hover .feature-num {
+      background:rgba(214,255,79,.1); border-color:rgba(214,255,79,.28);
+    }
+    .feature-copy h4 {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:1.1rem; letter-spacing:-.04em; margin:0 0 4px;
+    }
+    .feature-copy p { color:var(--muted); font-size:.88rem; line-height:1.7; margin:0; }
+    .feature-badge {
+      padding:7px 12px; border-radius:999px; white-space:nowrap;
+      font-size:.74rem; font-weight:900;
+    }
+    .badge-green  { background:rgba(34,197,94,.12);  color:#4ade80; border:1px solid rgba(34,197,94,.2); }
+    .badge-blue   { background:rgba(34,211,238,.12); color:#22d3ee; border:1px solid rgba(34,211,238,.2); }
+    .badge-purple { background:rgba(139,92,246,.12); color:#a78bfa; border:1px solid rgba(139,92,246,.2); }
+    .badge-lime   { background:rgba(214,255,79,.1);  color:#d6ff4f; border:1px solid rgba(214,255,79,.2); }
+
+    /* ═══════════════════════════════════════════
+       VIDEO SECTION
+    ═══════════════════════════════════════════ */
+    .video-wrap {
+      position:relative; border-radius:var(--r-xl);
+      overflow:hidden; border:1px solid var(--line);
+      background:var(--bg-2); box-shadow:var(--shadow);
+    }
+    .video-wrap video {
+      width:100%; max-height:560px; object-fit:cover; display:block;
+    }
+    /* poster overlay play button */
+    .video-overlay {
+      position:absolute; inset:0; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:16px;
+      background: linear-gradient(to top, rgba(7,8,12,.92), rgba(7,8,12,.4));
+      transition: opacity .35s ease; cursor:pointer;
+    }
+    .video-overlay.hidden { opacity:0; pointer-events:none; }
+    .play-btn {
+      width:80px; height:80px; display:grid; place-items:center;
+      border-radius:50%; color:#07080c; background:var(--accent-3);
+      font-size:1.8rem;
+      box-shadow:0 0 0 16px rgba(214,255,79,.1), 0 24px 50px rgba(214,255,79,.2);
+      transition: transform .28s, box-shadow .28s;
+    }
+    .video-overlay:hover .play-btn {
+      transform:scale(1.08);
+      box-shadow:0 0 0 22px rgba(214,255,79,.14), 0 28px 60px rgba(214,255,79,.28);
+    }
+    .video-overlay p { color:rgba(255,255,255,.8); font-weight:700; letter-spacing:.04em; font-size:.9rem; }
+
+    /* ═══════════════════════════════════════════
+       PROCESO / TIMELINE
+    ═══════════════════════════════════════════ */
+    .timeline { position:relative; padding-left:28px; }
+    .timeline::before {
+      content:""; position:absolute; left:11px; top:0; bottom:0; width:2px;
+      background:linear-gradient(to bottom, var(--accent-3), var(--accent-2), transparent);
+      opacity:.4;
+    }
+    .timeline-item {
+      position:relative; padding:0 0 48px 32px;
+      transition: opacity .3s;
+    }
+    .timeline-item:last-child { padding-bottom:0; }
+    .timeline-dot {
+      position:absolute; left:-17px; top:4px;
+      width:16px; height:16px; border-radius:50%;
+      background:var(--accent-3);
+      border:3px solid var(--bg);
+      box-shadow:0 0 14px rgba(214,255,79,.5);
+      transition: transform .28s, box-shadow .28s;
+    }
+    .timeline-item:hover .timeline-dot {
+      transform:scale(1.3);
+      box-shadow:0 0 22px rgba(214,255,79,.8);
+    }
+    .timeline-step {
+      color:var(--accent-3); font-size:.76rem; font-weight:900;
+      letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px;
+    }
+    .timeline-item h4 {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:1.55rem; letter-spacing:-.055em; margin:0 0 10px;
+    }
+    .timeline-item p { color:var(--muted); line-height:1.85; margin:0; }
+
+    /* ═══════════════════════════════════════════
+       TECH STACK GRID
+    ═══════════════════════════════════════════ */
+    .tech-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    }
+    .tech-card {
+      padding:22px 18px; border-radius:var(--r-md);
+      border:1px solid var(--line-soft);
+      background:rgba(255,255,255,.035);
+      display:flex; flex-direction:column; align-items:center;
+      gap:12px; text-align:center;
+      transition: border-color .3s, transform .3s, background .3s;
+    }
+    .tech-card:hover {
+      border-color:rgba(214,255,79,.24); transform:translateY(-6px);
+      background:rgba(214,255,79,.04);
+    }
+    .tech-icon {
+      width:48px; height:48px; display:grid; place-items:center;
+      border-radius:14px; font-size:1.4rem;
+      background:rgba(255,255,255,.06); border:1px solid var(--line-soft);
+    }
+    .tech-card span {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:.9rem; font-weight:700; letter-spacing:-.02em;
+    }
+    .tech-card small { color:var(--muted-2); font-size:.75rem; }
+
+    /* ═══════════════════════════════════════════
+       MEJORAS FUTURAS
+    ═══════════════════════════════════════════ */
+    .future-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+    .future-card {
+      padding:24px; border-radius:var(--r-md);
+      border:1px solid rgba(34,211,238,.15);
+      background:rgba(34,211,238,.04);
+      transition: border-color .3s, transform .3s;
+    }
+    .future-card:hover { border-color:rgba(34,211,238,.3); transform:translateY(-5px); }
+    .future-card i { font-size:1.5rem; color:var(--accent-2); margin-bottom:12px; display:block; }
+    .future-card h4 {
+      font-family:"Space Grotesk",sans-serif;
+      font-size:1.05rem; letter-spacing:-.04em; margin:0 0 8px;
+    }
+    .future-card p { color:var(--muted); font-size:.88rem; line-height:1.72; margin:0; }
+
+    /* ═══════════════════════════════════════════
+       PROYECTOS RELACIONADOS
+    ═══════════════════════════════════════════ */
+    .related-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .related-card {
+      overflow:hidden; border-radius:var(--r-lg);
+      border:1px solid var(--line); background:var(--card);
+      color:var(--text);
+      box-shadow:0 20px 60px rgba(0,0,0,.22);
+      transition: transform .34s, border-color .34s;
+    }
+    .related-card:hover { transform:translateY(-10px); border-color:rgba(214,255,79,.24); color:var(--text); }
+    .related-img { height:200px; overflow:hidden; background:var(--bg-2); position:relative; }
+    .related-img img { width:100%; height:100%; object-fit:cover; transition:transform .5s, filter .5s; }
+    .related-card:hover .related-img img { transform:scale(1.07); filter:saturate(1.1); }
+    .related-open {
+      position:absolute; right:14px; bottom:14px;
+      width:40px; height:40px; display:grid; place-items:center;
+      border-radius:50%; color:#07080c; background:var(--accent-3);
+      transform:rotate(-28deg); transition:transform .28s;
+    }
+    .related-card:hover .related-open { transform:rotate(0) scale(1.05); }
+    .related-body { padding:20px; }
+    .related-kicker { color:var(--accent-2); font-size:.74rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .related-body h3 { font-family:"Space Grotesk",sans-serif; font-size:1.3rem; letter-spacing:-.05em; margin:0 0 8px; }
+    .related-body p { color:var(--muted); font-size:.88rem; line-height:1.7; margin:0; }
+
+    /* ═══════════════════════════════════════════
+       CONTACTO
+    ═══════════════════════════════════════════ */
+    .contact-panel {
+      min-height:420px; padding:clamp(28px,5vw,60px);
+      overflow:hidden; position:relative;
+      border-radius:var(--r-xl); border:1px solid var(--line);
+      background:
+        radial-gradient(circle at 80% 10%, rgba(214,255,79,.16), transparent 30%),
+        linear-gradient(135deg, rgba(139,92,246,.18), rgba(34,211,238,.08)),
+        #11141d;
+      box-shadow:var(--shadow);
+    }
+    .contact-panel .section-title { max-width:820px; }
+    .section-text { color:var(--muted); line-height:1.86; font-size:1rem; margin:20px 0 0; max-width:680px; }
+    .contact-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; }
+    .contact-actions .btn-main,
+    .contact-actions .btn-ghost { width:auto; }
+
+    /* ═══════════════════════════════════════════
+       LIGHTBOX
+    ═══════════════════════════════════════════ */
+    #lightbox {
+      display:none; position:fixed; inset:0; z-index:5000;
+      background:rgba(0,0,0,.9); backdrop-filter:blur(18px);
+      align-items:center; justify-content:center;
+      animation: lbIn .3s ease;
+    }
+    #lightbox.open { display:flex; }
+    @keyframes lbIn { from{opacity:0} to{opacity:1} }
+    #lightbox img {
+      max-width:88vw; max-height:88vh; border-radius:16px;
+      box-shadow:0 40px 100px rgba(0,0,0,.7);
+      object-fit:contain;
+    }
+    #lightbox-close {
+      position:absolute; top:22px; right:22px;
+      width:48px; height:48px; display:grid; place-items:center;
+      border-radius:50%; color:white;
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14);
+      cursor:pointer; font-size:1.2rem;
+      transition:background .22s, transform .22s;
+    }
+    #lightbox-close:hover { background:rgba(255,255,255,.18); transform:rotate(90deg); }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    #toast {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(80px);
+      padding:14px 22px; border-radius:999px;
+      background:rgba(17,20,29,.94); border:1px solid var(--line);
+      backdrop-filter:blur(18px); color:white;
+      font-weight:700; font-size:.88rem;
+      display:flex; align-items:center; gap:10px;
+      z-index:4000; box-shadow:0 20px 50px rgba(0,0,0,.4);
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease;
+      opacity:0;
+    }
+    #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+    #toast i { color:var(--accent-3); }
+
+    /* ═══════════════════════════════════════════
+       BACK-TO-TOP
+    ═══════════════════════════════════════════ */
+    #back-top {
+      position:fixed; right:24px; bottom:24px; z-index:1040;
+      width:52px; height:52px; display:grid; place-items:center;
+      border-radius:50%; color:white;
+      background:rgba(255,255,255,.08); border:1px solid var(--line);
+      backdrop-filter:blur(14px);
+      transition: transform .28s, background .28s, opacity .28s;
+      opacity:0; pointer-events:none;
+    }
+    #back-top.visible { opacity:1; pointer-events:all; }
+    #back-top:hover { transform:translateY(-5px); background:rgba(255,255,255,.14); }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      padding:34px 0 46px; text-align:center;
+      color:var(--muted-2); font-size:.94rem;
     }
 
-    #menu-toggle:checked + .toggle-hamburguesa span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width:1080px) {
+      .nav-links { display:none; }
+      .site-nav { justify-content:space-between; }
+      .hero-grid { grid-template-columns:1fr; }
+      .info-panel { position:static; }
+      .detail-grid { grid-template-columns:1fr; }
+      .stats-strip { grid-template-columns:repeat(2,1fr); }
+      .tech-grid { grid-template-columns:repeat(3,1fr); }
+      .related-grid { grid-template-columns:1fr 1fr; }
+      .future-grid { grid-template-columns:1fr 1fr; }
     }
-
-    .curva-esquina {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 0;
-      background: #0d1b2a;
-      border-bottom-right-radius: 100% 100%;
-      transition: width 0.5s ease, height 0.5s ease;
-      z-index: 1400;
-      pointer-events: none;
-    }
-
-    #menu-toggle:checked ~ .curva-esquina {
-      width: 600px;
-      height: 600px;
-      pointer-events: auto;
-    }
-
-    .menu-lateral {
-      position: fixed;
-      top: 90px;
-      left: 80px;
-      z-index: 1501;
-      display: flex;
-      flex-direction: column;
-      gap: 25px;
-      opacity: 0;
-      transform: translateX(-50px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      pointer-events: none;
-    }
-
-    #menu-toggle:checked ~ .menu-lateral {
-      opacity: 1;
-      transform: translateX(0);
-      pointer-events: auto;
-    }
-
-    .menu-lateral a {
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 20px;
-      position: relative;
-      padding-left: 20px;
-    }
-
-    .menu-lateral a::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 10px;
-      background: #0d6efd;
-      border-radius: 50%;
-    }
-
-    .menu-lateral a:hover,
-    .menu-lateral a.active {
-      color: #66b0ff;
-    }
-
-    .menu-lateral a.active::before {
-      background: white;
-    }
-
-    @media (max-width: 768px) {
-      .intro-card {
-        flex-direction: column;
-        text-align: center;
-      }
-      .header-nombre {
-        font-size: 28px;
-      }
+    @media (max-width:760px) {
+      body { cursor:auto; }
+      #cursor-dot, #cursor-ring { display:none; }
+      .site-nav { min-height:58px; }
+      .nav-cta { display:none; }
+      .project-hero { padding-top:106px; }
+      .gallery-main { height:280px; }
+      .stats-strip, .tech-grid, .related-grid, .future-grid { grid-template-columns:1fr; }
+      .section { padding:72px 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Toggle Menu -->
-  <input type="checkbox" id="menu-toggle" />
-  <label for="menu-toggle" class="toggle-hamburguesa" aria-label="Menú">
-    <span></span>
-    <span></span>
-    <span></span>
-  </label>
-  <div class="curva-esquina"></div>
+<!-- CUSTOM CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
 
-  <!-- Menú lateral -->
-  <nav class="menu-lateral">
-    <a href="#sobre-mi" class="active">About Me</a>
-    <a href="#habilidades">Skills</a>
-    <a href="#herramientas">Tools</a>
-    <a href="#proyectos">Projects</a>
-    <a href="#conclusion">Conclusion</a>
-  </nav>
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
 
-  <!-- Header -->
-  <header>
-    <div class="header-nombre">Yojhan Furuya Caro</div>
-    <div class="header-correo">yojhancaro0@gmail.com</div>
-    <div class="container h-100 d-flex align-items-center">
-      <div class="intro-card" data-aos="fade-up">
-        <img src="https://cdn-icons-png.flaticon.com/512/4792/4792929.png" alt="My photo" />
-        <div class="intro-texto">
-          <h3>Hello! I'm Yojhan</h3>
-          <p>
-            I am a front-end developer passionate about UI/UX design. Welcome to my personal portfolio, where you'll discover my skills, the tools I use, and the projects that reflect my professional growth.
-          </p>
-        </div>
-      </div>
+<!-- TOAST -->
+<div id="toast"><i class="bi bi-check-circle-fill"></i><span id="toast-msg">¡Copiado!</span></div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" aria-modal="true" role="dialog">
+  <button id="lightbox-close" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+  <img id="lightbox-img" src="" alt="Vista ampliada"/>
+</div>
+
+<!-- BACK TO TOP -->
+<button id="back-top" aria-label="Volver arriba"><i class="bi bi-arrow-up"></i></button>
+
+<!-- ══════════════════════════════════════
+     NAV
+══════════════════════════════════════ -->
+<nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+  <a href="portafolio-final.html" class="brand">
+    <span class="brand-mark">Y</span>
+    Yojhan Furuya
+  </a>
+  <ul class="nav-links">
+    <li><a href="portafolio-final.html">Inicio</a></li>
+    <li><a href="proyectos.html" class="active">Proyectos</a></li>
+    <li><a href="portafolio-final.html#contacto">Contacto</a></li>
+  </ul>
+  <a href="proyectos.html" class="nav-cta">← Volver a proyectos</a>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HERO
+══════════════════════════════════════ -->
+<section class="project-hero">
+  <div class="container-custom">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-row" data-aos="fade-up">
+      <a href="proyectos.html"><i class="bi bi-arrow-left"></i> Proyectos</a>
+      <span style="color:var(--muted-2);">/</span>
+      <span style="color:var(--muted-2);">Sistema de Comandas</span>
     </div>
-  </header>
 
-  <!-- Sections -->
-  <!-- SOBRE MÍ -->
-  <section id="sobre-mi" data-aos="fade-up">
-    <div class="container">
-      <div class="text-center mb-4">
-        <i class="bi bi-person-circle seccion-icono"></i>
-        <h2>About Me</h2>
-      </div>
-      <div class="row justify-content-center">
-        <div class="col-lg-10">
-          <p>I am <strong>Yojhan Furuya</strong>, a web developer dedicated to creating clean, fast, and functional visual experiences. My passion lies in merging design and code to build modern, minimalist, and user-centered websites.</p>
-          <ul>
-            <li><strong>Location:</strong> Chile</li>
-            <li><strong>Specialization:</strong> Frontend and advanced layout with <em>HTML</em>, <em>CSS</em>, and <em>Bootstrap</em></li>
-            <li><strong>Style:</strong> Minimalist, professional, with visual details that attract and communicate</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
+    <div class="hero-grid">
 
-  <!-- HABILIDADES -->
-  <section id="habilidades" data-aos="fade-up">
-    <div class="container">
-      <div class="text-center mb-4">
-        <i class="bi bi-lightbulb seccion-icono"></i>
-        <h2>Skills</h2>
-      </div>
-      <div class="row justify-content-center">
-        <div class="col-md-10">
-          <ul>
-            <li>Contemporary web design adaptable to any device (<em>responsive design</em>)</li>
-            <li>Precise and semantic layout with <strong>HTML5</strong> and <strong>CSS3</strong></li>
-            <li>Advanced mastery of <strong>Bootstrap</strong> and grid systems for efficient layouts</li>
-            <li>Smooth and immersive animations using <strong>AOS.js</strong> and CSS transitions</li>
-            <li>User-centered design (UI/UX) focused on usability and aesthetics</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HERRAMIENTAS -->
-  <section id="herramientas" data-aos="fade-up">
-    <div class="container">
-      <div class="text-center mb-4">
-        <i class="bi bi-tools seccion-icono"></i>
-        <h2>Tools I Use</h2>
-      </div>
-      <div class="row justify-content-center text-center">
-        <div class="col-md-3 col-6 mb-4">
-          <i class="bi bi-braces fs-1 text-primary"></i>
-          <p class="mt-2">Visual Studio Code</p>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-          <i class="bi bi-bootstrap-fill fs-1 text-primary"></i>
-          <p class="mt-2">Bootstrap 5</p>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-          <i class="bi bi-git fs-1 text-primary"></i>
-          <p class="mt-2">Git & GitHub</p>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-          <i class="bi bi-browser-chrome fs-1 text-primary"></i>
-          <p class="mt-2">DevTools</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROYECTOS -->
-  <section id="proyectos" data-aos="fade-up">
-    <div class="container">
-      <div class="text-center mb-5">
-        <i class="bi bi-window-stack seccion-icono"></i>
-        <h2>Projects</h2>
-        <p class="lead">A selection of my recent works showcasing creativity, technique, and modern editorial design.</p>
-      </div>
-
-      <!-- Proyecto 1 -->
-      <div class="row align-items-center mb-5 g-4">
-        <div class="col-md-6">
-          <div id="carouselBarcelona" class="carousel slide rounded shadow" data-bs-ride="carousel">
-            <div class="carousel-inner rounded">
-              <div class="carousel-item active">
-                <img src="https://www.fcbarcelona.com/fcbarcelona/photo/2019/11/15/a88146ca-3960-42f5-bb09-93d5e5173b6a/comunicacio-institucional.jpg" class="d-block w-100" alt="Logo FC Barcelona" style="max-height: 400px; object-fit: contain;">
-              </div>
-              <div class="carousel-item">
-                <img src="http://www.4webs.es/blog/wp-content/uploads/2016/10/mockups-wireframes.jpg" class="d-block w-100" alt="Mockup 1" style="max-height: 400px; object-fit: contain;">
-              </div>
-              <div class="carousel-item">
-                <img src="https://images.vexels.com/media/users/3/185379/raw/877163bd32776deb051e1263d2602e34-sports-soccer-website-design.jpg" class="d-block w-100" alt="Mockup 2" style="max-height: 400px; object-fit: contain;">
-              </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselBarcelona" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
+      <!-- ── GALERÍA ── -->
+      <div data-aos="fade-up">
+        <div class="gallery-wrap">
+          <div class="gallery-main" id="gallery-main">
+            <img id="gallery-img" src="img/fotos-proyectos/comandas.png" alt="Vista principal Sistema de Comandas"/>
+            <span class="gallery-badge"><i class="bi bi-mortarboard-fill"></i> Trabajo de la U</span>
+            <button class="gallery-expand" id="gallery-expand-btn" aria-label="Ver en pantalla completa">
+              <i class="bi bi-arrows-fullscreen"></i>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselBarcelona" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
+            <span class="gallery-counter" id="gallery-counter">1 / 3</span>
+            <button class="gallery-arrow prev" id="gallery-prev" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+            <button class="gallery-arrow next" id="gallery-next" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
+          </div>
+          <div class="gallery-thumbs" id="gallery-thumbs">
+            <button class="active" data-src="img/fotos-proyectos/comandas.png" data-index="0" aria-label="Vista 1">
+              <img src="img/fotos-proyectos/comandas.png" alt="Vista 1"/>
+            </button>
+            <button data-src="img/fotos-proyectos/comandas (1).png" data-index="1" aria-label="Vista 2">
+              <img src="img/fotos-proyectos/comandas (1).png" alt="Vista 2"/>
+            </button>
+            <button data-src="video" data-index="2" class="thumb-video" aria-label="Ver video">
+              <i class="bi bi-play-circle-fill"></i>
             </button>
           </div>
         </div>
-        <div class="col-md-6">
-          <h3 class="fw-bold text-primary">Barcelona Club Website</h3>
-          <p class="fs-5 text-muted">
-            Complete development of a website dedicated to FC Barcelona, integrating modern design, intuitive navigation, and multimedia content for an engaging experience for club fans.
-          </p>
-          <a href="#" class="btn btn-outline-primary">View Project</a>
-        </div>
       </div>
 
-      <!-- Proyecto 2 -->
-      <div class="row align-items-center flex-md-row-reverse g-4">
-        <div class="col-md-6">
-          <div id="carouselEcommerce" class="carousel slide rounded shadow" data-bs-ride="carousel">
-            <div class="carousel-inner rounded">
-              <div class="carousel-item active">
-                <img src="https://i.pinimg.com/originals/38/d2/9a/38d29a3783de10fa1ed6fb94309c2212.jpg" class="d-block w-100" alt="Mockup Ecommerce 1" style="max-height: 400px; object-fit: cover;">
-              </div>
-              <div class="carousel-item">
-                <img src="https://i.pinimg.com/originals/b3/a6/72/b3a67267904cfcbb7a15788d3457d3c9.jpg" class="d-block w-100" alt="Mockup Ecommerce 2" style="max-height: 400px; object-fit: cover;">
-              </div>
-              <div class="carousel-item">
-                <img src="https://i.pinimg.com/originals/f0/77/8b/f0778b796b62e6bb12a28270abd81bbd.png" class="d-block w-100" alt="Mockup Ecommerce 3" style="max-height: 400px; object-fit: cover;">
-              </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselEcommerce" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselEcommerce" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
+      <!-- ── INFO PANEL ── -->
+      <aside class="info-panel" data-aos="fade-left" data-aos-delay="100">
+
+        <div class="info-card">
+          <div class="project-kicker">Sistema web · Restaurante</div>
+          <h1 class="project-title">Sistema de Comandas</h1>
+          <p class="project-desc">
+            Solución digital en tiempo real para optimizar el flujo de pedidos entre garzones y cocina, con panel administrativo de KPIs, historial y gestión de menú.
+          </p>
+          <div class="tags">
+            <span>Sistema web</span><span>PHP</span><span>MySQL</span>
+            <span>JavaScript</span><span>UX funcional</span>
+            <span>Gestión</span><span>Automatización</span>
           </div>
         </div>
-        <div class="col-md-6">
-          <h3 class="fw-bold text-primary">Ecommerce Store</h3>
-          <p class="fs-5 text-muted">
-            E-commerce platform developed with a focus on usability, responsive design, and optimized purchasing processes to offer a fast and secure shopping experience.
-          </p>
-          <a href="https://yofuruya.laboratoriodiseno.cl/fcbarcelona/" target="_blank" class="btn btn-outline-primary">View Project</a>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <small>Categoría</small>
+            <span>Trabajo académico</span>
+          </div>
+          <div class="meta-item">
+            <small>Año</small>
+            <span>2025 – 2026</span>
+          </div>
+          <div class="meta-item">
+            <small>Rol</small>
+            <span>Diseño & Desarrollo</span>
+          </div>
+          <div class="meta-item">
+            <small>Estado</small>
+            <span class="status-dot">Completado</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <a href="videos-portafolio/restaurante.mp4" target="_blank" class="btn-main">
+            Ver demo en video <i class="bi bi-play-circle-fill"></i>
+          </a>
+          <button class="btn-ghost" id="copy-btn" onclick="copyLink()">
+            <i class="bi bi-link-45deg"></i> Copiar enlace del proyecto
+          </button>
+          <a href="proyectos.html" class="btn-ghost">
+            <i class="bi bi-arrow-left"></i> Volver a proyectos
+          </a>
+        </div>
+
+      </aside>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip" data-aos="fade-up" data-aos-delay="180">
+      <div class="stat-card">
+        <strong data-count="3">0</strong>
+        <span>Módulos independientes (Garzón, Cocina, Admin)</span>
+      </div>
+      <div class="stat-card">
+        <strong data-count="13">0</strong>
+        <span>Endpoints PHP en la API REST</span>
+      </div>
+      <div class="stat-card">
+        <strong data-count="4">0</strong>
+        <span>Segundos de polling en tiempo real</span>
+      </div>
+      <div class="stat-card">
+        <strong data-count="5">0</strong>
+        <span>Tablas relacionales en MySQL</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PROBLEMA · SOLUCIÓN · RESULTADO
+══════════════════════════════════════ -->
+<section class="section">
+  <div class="container-custom">
+    <span class="eyebrow" data-aos="fade-up">Contexto del proyecto</span>
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom:36px;">Problema, solución y resultado.</h2>
+
+    <div class="detail-grid">
+
+      <div class="detail-block purple" data-aos="fade-up" data-aos-delay="80">
+        <div class="block-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <h3>El problema</h3>
+        <p>El restaurante gestionaba los pedidos en papel: los garzones escribían comandas a mano, la cocina recibía notas físicas y el cierre de caja era manual. Esto generaba errores frecuentes, pérdida de información y tiempos muertos innecesarios entre cada turno.</p>
+      </div>
+
+      <div class="detail-block lime" data-aos="fade-up" data-aos-delay="140">
+        <div class="block-icon"><i class="bi bi-lightbulb-fill"></i></div>
+        <h3>La solución</h3>
+        <p>Un sistema web con tres módulos en tiempo real: el garzón toma pedidos desde su panel, la cocina los recibe automáticamente cada 4 segundos y puede actualizar su estado, y el administrador accede a KPIs, historial y gestión completa del menú.</p>
+      </div>
+
+      <div class="detail-block" data-aos="fade-up" data-aos-delay="80">
+        <div class="block-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <h3>El resultado</h3>
+        <ul>
+          <li><strong>Eliminación total</strong> de comandas en papel</li>
+          <li><strong>Tiempo real</strong> entre garzón y cocina sin fricción</li>
+          <li><strong>Historial automático</strong> de cada pedido cerrado</li>
+          <li><strong>Control de menú</strong> desde el panel admin</li>
+          <li><strong>Dashboard de KPIs</strong> para decisiones rápidas</li>
+        </ul>
+      </div>
+
+      <div class="detail-block teal" data-aos="fade-up" data-aos-delay="140">
+        <div class="block-icon"><i class="bi bi-trophy-fill"></i></div>
+        <h3>Qué demuestra</h3>
+        <ul>
+          <li><strong>Arquitectura de sistemas</strong> con múltiples roles</li>
+          <li><strong>Backend funcional</strong> con PHP y MySQL</li>
+          <li><strong>API REST</strong> con 13 endpoints bien definidos</li>
+          <li><strong>UX funcional</strong> para usuarios no técnicos</li>
+          <li><strong>Pensamiento de producto</strong> end-to-end</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     MÓDULOS DEL SISTEMA
+══════════════════════════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container-custom">
+    <span class="eyebrow" data-aos="fade-up">Funcionalidades</span>
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom:36px;">Qué hace cada módulo.</h2>
+
+    <div class="feature-list" data-aos="fade-up" data-aos-delay="80">
+
+      <div class="feature-item">
+        <div class="feature-num">01</div>
+        <div class="feature-copy">
+          <h4>Panel Garzón</h4>
+          <p>Vista de mesas con estado en tiempo real. Permite abrir mesa, tomar pedido con detalle por producto, cantidad y nota, y finalizar mesa con un clic.</p>
+        </div>
+        <span class="feature-badge badge-blue">garzon/index.html</span>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-num">02</div>
+        <div class="feature-copy">
+          <h4>Panel Cocina</h4>
+          <p>Muestra tarjetas de pedidos pendientes con polling automático cada 4 segundos. El cocinero puede cambiar el estado a "Preparando" o marcar como "Listo".</p>
+        </div>
+        <span class="feature-badge badge-green">cocina/index.html</span>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-num">03</div>
+        <div class="feature-copy">
+          <h4>Panel Admin — KPIs e Historial</h4>
+          <p>Consulta los últimos 50 pedidos cerrados con métricas clave. Permite visualizar ventas, tiempos y el comportamiento del restaurante en el tiempo.</p>
+        </div>
+        <span class="feature-badge badge-lime">admin/index.html</span>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-num">04</div>
+        <div class="feature-copy">
+          <h4>Panel Admin — Gestión de Menú</h4>
+          <p>Alta, baja y toggle de disponibilidad de productos. Permite agregar nuevos platos, eliminarlos y marcarlos como agotados sin necesidad de tocar código.</p>
+        </div>
+        <span class="feature-badge badge-purple">admin/index.html</span>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-num">05</div>
+        <div class="feature-copy">
+          <h4>Cierre y Archivado Automático</h4>
+          <p>Al marcar un pedido como listo, el sistema lo archiva automáticamente en historial_pedidos, libera la mesa y limpia los registros activos de la BD.</p>
+        </div>
+        <span class="feature-badge badge-green">historial.php</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     VIDEO
+══════════════════════════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container-custom">
+    <span class="eyebrow" data-aos="fade-up">Demo en video</span>
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom:32px;">El sistema en acción.</h2>
+
+    <div class="video-wrap" data-aos="zoom-in">
+      <video id="project-video" preload="metadata" poster="img/portada-restaurante.png">
+        <source src="videos-portafolio/restaurante.mp4" type="video/mp4"/>
+      </video>
+      <div class="video-overlay" id="video-overlay">
+        <div class="play-btn"><i class="bi bi-play-fill"></i></div>
+        <p>Ver demo del sistema</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PROCESO / TIMELINE
+══════════════════════════════════════ -->
+<section class="section">
+  <div class="container-custom">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start;" class="timeline-layout">
+      <div>
+        <span class="eyebrow" data-aos="fade-up">Metodología</span>
+        <h2 class="section-title" data-aos="fade-up" style="margin-bottom:36px;">Cómo se construyó.</h2>
+        <div class="timeline" data-aos="fade-up" data-aos-delay="100">
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-step">Fase 01</div>
+            <h4>Análisis del flujo real</h4>
+            <p>Se estudió cómo funciona un restaurante: qué necesita el garzón, qué necesita la cocina y qué datos requiere el administrador para tomar decisiones.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-step">Fase 02</div>
+            <h4>Diseño de base de datos</h4>
+            <p>Se modeló la BD con tablas para mesas, pedidos, detalle de pedidos, productos e historial, asegurando integridad relacional y facilidad de consulta.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-step">Fase 03</div>
+            <h4>API y backend PHP</h4>
+            <p>13 endpoints para manejar todos los flujos: guardar pedido, cambiar estado, cerrar mesa, gestionar menú y consultar historial con KPIs.</p>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-step">Fase 04</div>
+            <h4>Interfaces y experiencia</h4>
+            <p>Cada panel fue diseñado para su usuario: garzón con vista de mesas, cocina con tarjetas en tiempo real y admin con dashboard completo.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tech Stack -->
+      <div data-aos="fade-left" data-aos-delay="120">
+        <span class="eyebrow">Stack técnico</span>
+        <h2 class="section-title" style="margin-bottom:30px;">Tecnologías usadas.</h2>
+        <div class="tech-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="tech-card">
+            <div class="tech-icon">🌐</div>
+            <span>HTML5</span><small>Estructura</small>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon">🎨</div>
+            <span>CSS3</span><small>Estilos</small>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon">⚡</div>
+            <span>JavaScript</span><small>Interacción</small>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon">🐘</div>
+            <span>PHP</span><small>Backend API</small>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon">🗄️</div>
+            <span>MySQL</span><small>Base de datos</small>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon">🔄</div>
+            <span>REST API</span><small>13 endpoints</small>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CONCLUSION -->
-  <section id="conclusion" data-aos="fade-up">
-    <div class="container">
-      <div class="text-center mb-4">
-        <i class="bi bi-patch-check seccion-icono"></i>
-        <h2>Conclusion</h2>
+<!-- ══════════════════════════════════════
+     MEJORAS FUTURAS
+══════════════════════════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container-custom">
+    <span class="eyebrow" data-aos="fade-up">Roadmap</span>
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom:32px;">Mejoras futuras planeadas.</h2>
+
+    <div class="future-grid">
+      <div class="future-card" data-aos="fade-up" data-aos-delay="80">
+        <i class="bi bi-bar-chart-fill"></i>
+        <h4>Dashboard con gráficos</h4>
+        <p>Reportes visuales de ventas por día, hora pico, productos más pedidos y comparativa semanal.</p>
       </div>
-      <div class="row justify-content-center">
-        <div class="col-lg-10 text-center">
-          <p>My philosophy as a developer is clear: <strong>to create websites that communicate with style, fluidity, and clarity</strong>. I always strive for each project to be a unique and meaningful experience.</p>
-          <p class="mt-4">Want to collaborate? <br /><strong>Let's talk and create something extraordinary together.</strong></p>
+      <div class="future-card" data-aos="fade-up" data-aos-delay="130">
+        <i class="bi bi-printer-fill"></i>
+        <h4>Impresión de ticket</h4>
+        <p>Integración con impresoras térmicas para emitir ticket automático al cerrar un pedido.</p>
+      </div>
+      <div class="future-card" data-aos="fade-up" data-aos-delay="180">
+        <i class="bi bi-phone-fill"></i>
+        <h4>PWA para cocina</h4>
+        <p>Versión instalable en tablet o smartphone para que la cocina no dependa de un computador fijo.</p>
+      </div>
+      <div class="future-card" data-aos="fade-up" data-aos-delay="80">
+        <i class="bi bi-bell-fill"></i>
+        <h4>Notificaciones push</h4>
+        <p>Alertas en tiempo real cuando llega un pedido nuevo, sin necesidad de mantener la ventana en foco.</p>
+      </div>
+      <div class="future-card" data-aos="fade-up" data-aos-delay="130">
+        <i class="bi bi-people-fill"></i>
+        <h4>Roles y permisos</h4>
+        <p>Sistema de login con roles diferenciados: dueño, administrador, garzón y cocinero con vistas distintas.</p>
+      </div>
+      <div class="future-card" data-aos="fade-up" data-aos-delay="180">
+        <i class="bi bi-credit-card-fill"></i>
+        <h4>Integración de pagos</h4>
+        <p>Flujo de cobro integrado con splits de cuenta, propina y registro automático en el historial.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     PROYECTOS RELACIONADOS
+══════════════════════════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container-custom">
+    <span class="eyebrow" data-aos="fade-up">Más proyectos</span>
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom:34px;">También podría interesarte.</h2>
+
+    <div class="related-grid">
+      <a href="proyecto-detalle.html" class="related-card" data-aos="fade-up" data-aos-delay="80">
+        <div class="related-img">
+          <img src="img/portada-gymprime.png" alt="GymPrime"/>
+          <span class="related-open"><i class="bi bi-arrow-up-right"></i></span>
         </div>
+        <div class="related-body">
+          <div class="related-kicker">Universidad · Gestión</div>
+          <h3>GymPrime</h3>
+          <p>Sistema para gestionar alumnos, pagos y ejercicios de un gimnasio.</p>
+        </div>
+      </a>
+      <a href="proyecto-detalle.html" class="related-card" data-aos="fade-up" data-aos-delay="140">
+        <div class="related-img">
+          <img src="img/portada-drake.png" alt="Drake Experience"/>
+          <span class="related-open"><i class="bi bi-arrow-up-right"></i></span>
+        </div>
+        <div class="related-body">
+          <div class="related-kicker">Propio · Ecommerce</div>
+          <h3>Drake Experience Website</h3>
+          <p>Sitio temático con propuesta editorial y estructura ecommerce en WordPress.</p>
+        </div>
+      </a>
+      <a href="proyecto-detalle.html" class="related-card" data-aos="fade-up" data-aos-delay="200">
+        <div class="related-img">
+          <img src="img/portada-todopsnchile.png" alt="TodoPSNChile"/>
+          <span class="related-open"><i class="bi bi-arrow-up-right"></i></span>
+        </div>
+        <div class="related-body">
+          <div class="related-kicker">Propio · Ventas digitales</div>
+          <h3>TodoPSNChile</h3>
+          <p>Sistema de ventas digitales para plataformas streaming con catálogo y precios.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CONTACTO
+══════════════════════════════════════ -->
+<section class="section">
+  <div class="container-custom">
+    <div class="contact-panel" data-aos="zoom-in">
+      <span class="eyebrow">Contacto</span>
+      <h2 class="section-title">¿Quieres ver más detalles de este proyecto?</h2>
+      <p class="section-text">Puedo ampliar cada caso con documentación, capturas adicionales, repositorio, decisiones técnicas y mejoras futuras. Escríbeme y conversamos.</p>
+      <div class="contact-actions">
+        <a href="mailto:yojhancaro0@gmail.com" class="btn-main">Escribirme <i class="bi bi-send-fill"></i></a>
+        <a href="proyectos.html" class="btn-ghost"><i class="bi bi-arrow-left"></i> Ver todos los proyectos</a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Footer -->
-  <footer class="bg-dark text-white py-4 mt-5">
-    <div class="container text-center">
-      <h5 class="mb-3">Let's connect</h5>
-      <div class="mb-3">
-        <a href="https://www.linkedin.com/in/tu-usuario" class="text-white mx-2" target="_blank"><i class="bi bi-linkedin fs-4"></i></a>
-        <a href="https://github.com/tu-usuario" class="text-white mx-2" target="_blank"><i class="bi bi-github fs-4"></i></a>
-        <a href="https://www.instagram.com/tu-usuario" class="text-white mx-2" target="_blank"><i class="bi bi-instagram fs-4"></i></a>
-        <a href="mailto:yojhancaro0@gmail.com" class="text-white mx-2"><i class="bi bi-envelope fs-4"></i></a>
-      </div>
-      <a href="cv-yojhan.pdf" download class="btn btn-outline-light btn-sm">Download CV</a>
-      <p class="mt-3 mb-0 small">&copy; 2025 Yojhan Furuya. All rights reserved.</p>
-    </div>
-  </footer>
+<footer>© 2026 Yojhan Furuya · Portafolio creativo 2.0.</footer>
 
-  <!-- Bootstrap Bundle JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+/* ── AOS ── */
+AOS.init({ duration:850, easing:"ease-out-cubic", once:false, offset:80 });
 
-  <!-- AOS JS -->
-  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+/* ── CURSOR ── */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+(function animCursor() {
+  rx += (mx - rx) * 0.14;
+  ry += (my - ry) * 0.14;
+  dot.style.left  = mx + 'px';
+  dot.style.top   = my + 'px';
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a,button,.gallery-arrow,.feature-item,.stat-card,.tech-card,.related-card,.future-card,.detail-block')
+  .forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
 
-  <script>
-    AOS.init({
-      duration: 800,
-      easing: 'ease-in-out',
-      once: false
-    });
+/* ── PROGRESS BAR ── */
+const pbar = document.getElementById('progress-bar');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  pbar.style.width = pct + '%';
+});
 
-    const menuLinks = document.querySelectorAll('.menu-lateral a');
+/* ── NAV SCROLL ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 80);
+});
 
-    window.addEventListener('scroll', () => {
-      let fromTop = window.scrollY + 150;
+/* ── BACK TO TOP ── */
+const btt = document.getElementById('back-top');
+window.addEventListener('scroll', () => btt.classList.toggle('visible', window.scrollY > 400));
+btt.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
 
-      menuLinks.forEach(link => {
-        let section = document.querySelector(link.hash);
+/* ── GALLERY ── */
+const imgs = [
+  'img/fotos-proyectos/comandas.png',
+  'img/fotos-proyectos/comandas (1).png',
+  null // null = video slot
+];
+let current = 0;
+const galleryImg     = document.getElementById('gallery-img');
+const galleryCounter = document.getElementById('gallery-counter');
+const thumbBtns      = document.querySelectorAll('#gallery-thumbs button');
 
-        if (section.offsetTop <= fromTop && section.offsetTop + section.offsetHeight > fromTop) {
-          link.classList.add('active');
-        } else {
-          link.classList.remove('active');
-        }
+function goToSlide(idx) {
+  current = idx;
+  const src = imgs[idx];
+  if (src) {
+    galleryImg.classList.remove('fade-in');
+    void galleryImg.offsetWidth; // reflow
+    galleryImg.classList.add('fade-in');
+    galleryImg.src = src;
+  } else {
+    // video thumb: abrir el video en nueva pestaña
+    window.open('videos-portafolio/restaurante.mp4','_blank');
+  }
+  galleryCounter.textContent = (idx+1) + ' / ' + imgs.length;
+  thumbBtns.forEach((b,i) => b.classList.toggle('active', i===idx));
+}
+
+thumbBtns.forEach((btn, i) => btn.addEventListener('click', () => goToSlide(i)));
+document.getElementById('gallery-prev').addEventListener('click', () => goToSlide((current - 1 + imgs.length) % imgs.length));
+document.getElementById('gallery-next').addEventListener('click', () => goToSlide((current + 1) % imgs.length));
+
+// keyboard arrows
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  goToSlide((current - 1 + imgs.length) % imgs.length);
+  if (e.key === 'ArrowRight') goToSlide((current + 1) % imgs.length);
+  if (e.key === 'Escape')     closeLightbox();
+});
+
+/* ── LIGHTBOX ── */
+const lightbox    = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+document.getElementById('gallery-expand-btn').addEventListener('click', () => {
+  lightboxImg.src = galleryImg.src;
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+/* ── VIDEO OVERLAY ── */
+const vid     = document.getElementById('project-video');
+const overlay = document.getElementById('video-overlay');
+overlay.addEventListener('click', () => {
+  overlay.classList.add('hidden');
+  vid.play();
+});
+vid.addEventListener('pause', () => overlay.classList.remove('hidden'));
+
+/* ── COUNT-UP STATS ── */
+function countUp(el, target, duration=1400) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const t = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = Math.round(start);
+    if (start >= target) clearInterval(t);
+  }, 16);
+}
+const statObs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('[data-count]').forEach(el => {
+        countUp(el, +el.dataset.count);
       });
-    });
+      statObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('.stats-strip').forEach(el => statObs.observe(el));
 
-    menuLinks.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(link.hash);
-        target.scrollIntoView({ behavior: 'smooth' });
+/* ── COPY LINK TOAST ── */
+const toast    = document.getElementById('toast');
+const toastMsg = document.getElementById('toast-msg');
+function showToast(msg) {
+  toastMsg.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    showToast('¡Enlace copiado al portapapeles!');
+  });
+}
 
-        document.getElementById('menu-toggle').checked = false;
-
-        setTimeout(() => {
-          AOS.refreshHard();
-        }, 500);
-      });
-    });
-  </script>
-
+/* ── TIMELINE HOVER HIGHLIGHT ── */
+document.querySelectorAll('.timeline-item').forEach(item => {
+  item.addEventListener('mouseenter', () => {
+    document.querySelectorAll('.timeline-item').forEach(i => i.style.opacity = '.45');
+    item.style.opacity = '1';
+  });
+  item.addEventListener('mouseleave', () => {
+    document.querySelectorAll('.timeline-item').forEach(i => i.style.opacity = '1');
+  });
+});
+</script>
 </body>
 </html>
